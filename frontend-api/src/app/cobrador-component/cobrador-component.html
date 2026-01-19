@@ -1,0 +1,231 @@
+<div class="container mt-4">
+
+  <!-- Título -->
+  <div class="row mb-4">
+    <div class="col">
+      <h2 class="text-center">Gestión de cobradores REST</h2>
+    </div>
+  </div>
+
+  <!-- Mensaje de éxito -->
+  <div *ngIf="successMessage" class="alert alert-success alert-dismissible fade show" role="alert">
+    {{ successMessage }}
+    <button type="button" class="btn-close" (click)="successMessage = ''"></button>
+  </div>
+
+  <!-- Mensaje de error -->
+  <div *ngIf="errorMessage" class="alert alert-danger alert-dismissible fade show" role="alert">
+    {{ errorMessage }}
+    <button type="button" class="btn-close" (click)="errorMessage = ''"></button>
+  </div>
+
+  <!-- Indicador de carga -->
+  <div *ngIf="loading" class="text-center my-3">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Cargando...</span>
+    </div>
+    <p class="mt-2">Cargando...</p>
+  </div>
+
+  <!-- Búsqueda por cédula -->
+  <div class="card mb-4">
+    <div class="card-header fw-bold">
+      Búsqueda por cédula
+    </div>
+    <div class="card-body">
+
+      <div class="row g-2 align-items-center">
+        <div class="col-md-8">
+          <input 
+            type="text" 
+            class="form-control"
+            [(ngModel)]="cedulaBusqueda" 
+            placeholder="Ingrese cédula"
+            [disabled]="loading">
+        </div>
+        <div class="col-md-4 d-grid">
+          <button 
+            class="btn btn-primary"
+            (click)="buscarPorCedula()"
+            [disabled]="loading || !cedulaBusqueda.trim()">
+            Buscar
+          </button>
+        </div>
+      </div>
+
+      <!-- Resultado de búsqueda -->
+      <div *ngIf="cobrador" class="alert alert-success mt-3">
+        <div class="d-flex justify-content-between align-items-start">
+          <div>
+            <h5 class="alert-heading">Cobrador encontrado</h5>
+            <p class="mb-1"><strong>ID:</strong> {{ cobrador.cobrador_id }}</p>
+            <p class="mb-1"><strong>Cédula:</strong> {{ cobrador.cobrador_cedula }}</p>
+            <p class="mb-1"><strong>Nombre:</strong> {{ cobrador.cobrador_nombre }}</p>
+            <p class="mb-0"><strong>Dirección:</strong> {{ cobrador.cobrador_direccion }}</p>
+          </div>
+          <div>
+            <button 
+              class="btn btn-sm btn-warning me-1" 
+              (click)="cargarEnFormulario()"
+              [disabled]="loading">
+              Editar
+            </button>
+            <button 
+              class="btn btn-sm btn-outline-secondary" 
+              (click)="cobrador = null; cedulaBusqueda = ''"
+              [disabled]="loading">
+              Limpiar
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Formulario para crear/editar -->
+  <div class="card mb-4">
+    <div class="card-header fw-bold d-flex justify-content-between align-items-center">
+      <span>{{ isEditMode ? 'Editar Cobrador' : 'Nuevo Cobrador' }}</span>
+      <span *ngIf="isEditMode && cobrador" class="badge bg-warning">
+        Editando ID: {{ cobrador.cobrador_id }}
+      </span>
+    </div>
+    <div class="card-body">
+
+      <form (ngSubmit)="isEditMode ? actualizarCobrador() : crearCobrador()">
+        <div class="row g-3">
+          <div class="col-md-4">
+            <label class="form-label">Cédula *</label>
+            <input 
+              type="text" 
+              class="form-control"
+              [(ngModel)]="formCobrador.cobrador_cedula"
+              name="cedula"
+              required
+              maxlength="15"
+              [disabled]="loading">
+          </div>
+          
+          <div class="col-md-8">
+            <label class="form-label">Nombre *</label>
+            <input 
+              type="text" 
+              class="form-control"
+              [(ngModel)]="formCobrador.cobrador_nombre"
+              name="nombre"
+              required
+              maxlength="300"
+              [disabled]="loading">
+          </div>
+          
+          <div class="col-12">
+            <label class="form-label">Dirección</label>
+            <input 
+              type="text" 
+              class="form-control"
+              [(ngModel)]="formCobrador.cobrador_direccion"
+              name="direccion"
+              maxlength="300"
+              [disabled]="loading">
+          </div>
+          
+          <div class="col-12">
+            <div class="d-flex gap-2">
+              <button 
+                type="submit" 
+                class="btn btn-primary"
+                [disabled]="loading || !formCobrador.cobrador_cedula.trim() || !formCobrador.cobrador_nombre.trim()">
+                {{ isEditMode ? 'Actualizar' : 'Crear' }}
+                <span *ngIf="loading" class="spinner-border spinner-border-sm ms-1"></span>
+              </button>
+              
+              <button 
+                type="button" 
+                class="btn btn-secondary"
+                (click)="cancelarEdicion()"
+                *ngIf="isEditMode"
+                [disabled]="loading">
+                Cancelar
+              </button>
+              
+              <button 
+                type="button" 
+                class="btn btn-outline-danger ms-auto"
+                (click)="resetFormulario(); clearMessages()"
+                [disabled]="loading">
+                Limpiar formulario
+              </button>
+            </div>
+          </div>
+        </div>
+      </form>
+
+    </div>
+  </div>
+
+  <!-- Lista de cobradores -->
+  <div class="card mb-4">
+    <div class="card-header fw-bold d-flex justify-content-between align-items-center">
+      <span>Lista de cobradores ({{ cobradores.length }})</span>
+      <div>
+        <button 
+          class="btn btn-sm btn-outline-primary me-2"
+          (click)="clearMessages()">
+          Limpiar Mensajes
+        </button>
+        <button 
+          class="btn btn-sm btn-success"
+          (click)="cargarCobradores()"
+          [disabled]="loading">
+          <i class="bi bi-arrow-clockwise"></i> Actualizar
+        </button>
+      </div>
+    </div>
+    <div class="card-body table-responsive">
+
+      <table class="table table-bordered table-hover align-middle">
+        <thead class="table-dark text-center">
+          <tr>
+            <th>ID</th>
+            <th>Cédula</th>
+            <th>Nombre</th>
+            <th>Dirección</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let c of cobradores">
+            <td class="text-center">{{ c.cobrador_id }}</td>
+            <td>{{ c.cobrador_cedula }}</td>
+            <td>{{ c.cobrador_nombre }}</td>
+            <td>{{ c.cobrador_direccion }}</td>
+            <td class="text-center">
+              <div class="btn-group btn-group-sm" role="group">
+                <button 
+                  class="btn btn-warning"
+                  (click)="editarCobrador(c)"
+                  [disabled]="loading">
+                  Editar
+                </button>
+                <button 
+                  class="btn btn-danger"
+                  (click)="eliminarCobrador(c.cobrador_id!)"
+                  [disabled]="loading">
+                  Eliminar
+                </button>
+              </div>
+            </td>
+          </tr>
+          <tr *ngIf="cobradores.length === 0">
+            <td colspan="5" class="text-center text-muted py-4">
+              No hay cobradores registrados.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+    </div>
+  </div>
+
+</div>
