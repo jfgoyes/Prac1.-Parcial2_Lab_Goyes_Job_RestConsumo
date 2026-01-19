@@ -1,0 +1,22 @@
+{
+  "dependencies": {
+    "express": "^5.2.1",
+    "mssql": "^12.2.0"
+  },
+  "name": "servidor-api",
+  "version": "1.0.0",
+  "description": "Servidor para API REST que expone servicios que serán consumids por un frontend en Angular",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "API",
+    "REST",
+    "WebService",
+    "NodeJS"
+  ],
+  "author": "Job F. Goyes A.",
+  "license": "ISC",
+  "type": "commonjs"
+}
